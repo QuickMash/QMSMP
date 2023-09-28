@@ -1,0 +1,109 @@
+<?php
+// Database Configuration
+$servername = "na05-sql.pebblehost.com"; // Database Host
+$username = "customer_580686_website";     // Database Username
+$password = "Xu@6-KshCTEJ2x5rFFoG";        // Database Password
+$dbname = "customer_580686_website";       // Database Name
+$port = 3306;                              // Port
+
+// Create a connection
+$conn = new mysqli($servername, $username, $password, $dbname, $port);
+
+// Check the connection
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+// Function to sanitize user inputs
+function sanitize_input($input) {
+    global $conn;
+    return mysqli_real_escape_string($conn, $input);
+}
+
+// User Registration
+if (isset($_POST['register'])) {
+    $username = sanitize_input($_POST['username']);
+    $email = sanitize_input($_POST['email']);
+    $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
+
+    $sql = "INSERT INTO users (username, email, password) VALUES ('$username', '$email', '$password')";
+
+    if ($conn->query($sql) === TRUE) {
+        echo "Registration successful!";
+    } else {
+        echo "Error: " . $sql . "<br>" . $conn->error;
+    }
+}
+
+// User Login
+if (isset($_POST['login'])) {
+    $username = sanitize_input($_POST['login_username']);
+    $password = $_POST['login_password'];
+
+    $sql = "SELECT * FROM users WHERE username = '$username'";
+    $result = $conn->query($sql);
+
+    if ($result->num_rows == 1) {
+        $row = $result->fetch_assoc();
+        if (password_verify($password, $row['password'])) {
+            echo "Login successful!";
+            // You can add session handling and redirect to a user dashboard here
+        } else {
+            echo "Incorrect password!";
+        }
+    } else {
+        echo "User not found!";
+    }
+}
+
+// Close the database connection
+$conn->close();
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home Page</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="container">
+                <div class="logo">Your Logo</div>
+                <ul class="menu">
+                    <li><a href="#">Home</a></li>
+                    <li><a href="#">About</a></li>
+                    <li><a href="#">Services</a></li>
+                    <li><a href="#">Portfolio</a></li>
+                    <li><a href="#">Contact</a></li>
+                    <li><a href="#">Login</a></li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <section class="hero">
+        <div class="container">
+            <h1>Welcome to Your Website</h1>
+            <p>Your website's tagline or brief description goes here.</p>
+            <a href="#" class="btn">Learn More</a>
+        </div>
+    </section>
+
+    <section class="content">
+        <div class="container">
+            <h2>About Us</h2>
+            <p>This is the content section of your homepage. You can add text, images, and other elements here to describe your business or organization.</p>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2023 Your Website</p>
+        </div>
+    </footer>
+</body>
+</html>
